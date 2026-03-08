@@ -1,10 +1,11 @@
 import type { Request, Response } from "express";
 import User from "../models/user.model.ts";
 import bcrypt from "bcryptjs";
-import {generateToken} from "../lib/utils.ts"
+import {generateToken} from "../lib/utils.ts";
+import cloudinary from "../lib/cloudinary.ts"
 
 export const signUp = async (req: Request, res: Response) => {
-    const {fullName , email , password , userName  } = req.body;
+    const {fullName , email , password , userName, profileImage  } = req.body;
     
     try {
         if (!fullName || !email || !password || !userName) {
@@ -29,7 +30,7 @@ export const signUp = async (req: Request, res: Response) => {
             email,
             password : hashedPass,
             userName,
-            // ProfileImage,
+            profileImage,
         })
 
         if(newUser) {
@@ -41,7 +42,8 @@ export const signUp = async (req: Request, res: Response) => {
                 _id : newUser._id,
                 fullName : newUser.fullName,
                 email : newUser.email,
-                // ProfileImage : newUser.ProfileImage,
+                userName: newUser.userName,
+                profileImage : newUser.profileImage,
             });
         } else {
             res.status(400)
@@ -88,7 +90,7 @@ export const logIn = async (req: Request, res: Response) => {
             fullName: user.fullName,
             email: user.email,
             userName: user.userName,
-            // ProfileImage: user.ProfileImage,
+            profileImage: user.profileImage,
             message: "user logged in successfully"
         });
     } catch (error) {
@@ -107,3 +109,23 @@ export const logOut = async (req: Request, res: Response) => {
     }
 }
  
+export const updateProfile = async (req : Request , res : Response) => {
+     try {
+        const {profileImage} = req.body;
+        const userId = req.user._id;
+
+        if(!profileImage) {
+            return res.status(400)
+            .json({message : "profile picture is required"});
+        }
+
+        const uploadProfile = await cloudinary.uploader.upload(profileImage);
+        const updatedUser = await User.findByIdAndUpdate(userId , {profileImage : uploadProfile.secure_url} , {new : true})
+
+        res.status(200)
+        .json(updatedUser)
+     } catch (error) {
+        res.status(500)
+        .json({message : "internal server error" , error})
+     }
+}
