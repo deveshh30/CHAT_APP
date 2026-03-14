@@ -2,12 +2,13 @@ import './App.css'
 import Navbar from './components/Navbar'
 import { Routes , Route, Navigate } from 'react-router-dom'
 import Homepage from './pages/Homepage'
-import Signinpage from './pages/Signinpage'
+import SignUpPage from './pages/Signinpage'
 import Loginpage from './pages/Loginpage'
 import Settingspage from './pages/Settingspage'
 import Profilepage from './pages/Profilepage'
 import { checkUserAuthenticated } from './store/checkUserAuthentication'
 import { useEffect } from 'react'
+import { Toaster } from 'react-hot-toast'
 
 
 function App() {
@@ -29,11 +30,13 @@ function App() {
 
       <Routes>
         <Route path="/" element={ authUser? <Homepage/> : <Navigate to="/login"/> }  />
-        <Route path="/signup" element={!authUser ? <Signinpage/> : <Navigate to="/" />}  />
+        <Route path="/signup" element={!authUser ? <SignUpPage/> : <Navigate to="/" />}  />
         <Route path="/login" element={!authUser ? <Loginpage/> : <Navigate to="/" />}/>
         <Route path="/settings" element={<Settingspage/>}  />
-        <Route path="/proile" element={ authUser? <Profilepage/> : <Navigate to="/login"/>}  />
+        <Route path="/proile" element={ authUser? <Profilepage/> : <Navigate to="/logIn"/>}  />
       </Routes>
+
+      <Toaster/> 
     </>
   )
 }
