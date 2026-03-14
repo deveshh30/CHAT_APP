@@ -1,5 +1,6 @@
 import {create } from "zustand";
 import { axiosInstance } from "../lib/axios";
+import toast from "react-hot-toast";
 
 interface SignUpPayload {
     fullName: string;
@@ -16,6 +17,7 @@ interface AuthStore {
     isCheckingAuth: boolean;
     checkAuth: () => Promise<void>;
     signUp: (data: SignUpPayload) => Promise<void>;
+     logOut: () => Promise<void>;
 }
 
 export const checkUserAuthenticated = create<AuthStore>((set) => ({
@@ -36,15 +38,25 @@ export const checkUserAuthenticated = create<AuthStore>((set) => ({
     },
 
     signUp: async (data) => {
-        try {
-            set({ isSigningUp: true });
-            const res = await axiosInstance.post("/auth/signup", data);
-            set({ authUser: res.data });
-        } catch (error: unknown) {
-            console.log("signup failed", error);
-            window.alert("Signup failed");
-        } finally {
-            set({ isSigningUp: false });
-        }
-    },
+    set({ isSigningUp: true });
+    try {
+      const res = await axiosInstance.post("/auth/signUp", data);
+      set({ authUser: res.data });
+      toast.success("Account created successfully");
+    } catch (error) {
+      toast.error((error as any).response.data.message);
+    } finally {
+      set({ isSigningUp: false });
+    }
+  },
+
+  logOut : async () => {
+    try {
+        await axiosInstance.post("/auth/logOut");
+        set({ authUser: null });
+        toast.success("user logged out successfully")
+        } catch (error) {
+        toast.error((error as any).response.data.message);
+    }
+  }
 }))
